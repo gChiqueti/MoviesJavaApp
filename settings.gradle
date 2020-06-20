@@ -1,0 +1,2 @@
+rootProject.name='TesteTokenLab'
+include ':app'
