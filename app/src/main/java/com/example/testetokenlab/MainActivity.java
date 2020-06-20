@@ -28,8 +28,10 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
+
     class RetrieveFeedTask extends AsyncTask<String, Void, String>
     {
+        Exception exception;
         private String readStream(InputStream in) throws IOException
         {
             StringBuilder sb = new StringBuilder();
@@ -173,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        LinearLayout ll = (LinearLayout) findViewById(R.id.layout);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
         for (int i = 0; i < jsonArray.length(); i++)
         {
@@ -180,18 +184,28 @@ public class MainActivity extends AppCompatActivity {
                 String title = jsonArray.getJSONObject(i).getString("title");
                 Button myButton = new Button(this);
                 myButton.setText(title);
-
-                LinearLayout ll = (LinearLayout) findViewById(R.id.layout);
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 ll.addView(myButton, lp);
+
             }catch (JSONException e)
             {
 
             }
 
-        }
+            try {
+                String url = jsonArray.getJSONObject(i).getString("poster_url");
+                Log.i("URL", url);
+                Bitmap bitmap = new RetrieveImage().execute(url).get();
+                if (bitmap != null) {
+                    ImageView v = new ImageView(this);
+                    v.setImageBitmap(bitmap);
+                    ll.addView(v, lp);
+                }
+            } catch (Exception e)
+            {
 
+            }
 
+        }  // endfor
 
     }
 }
