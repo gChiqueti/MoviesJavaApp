@@ -50,15 +50,22 @@ public class MainActivity extends AppCompatActivity {
 
         botao_principal = (Button) findViewById(R.id.buttonTitulo);
 
-        JSONArray jsonArray;
+        String jsonString;
         try {
-            jsonArray = new GetJsonFromEndpoint().execute(ENDPOINT_URL).get();
+            jsonString = new GetJsonFromEndpoint().execute(ENDPOINT_URL).get();
         } catch (ExecutionException e) {
             e.printStackTrace();
             return;
         } catch (InterruptedException e) {
             e.printStackTrace();
             return;
+        }
+
+        JSONArray jsonArray = null;
+        try {
+            jsonArray = new JSONArray(jsonString);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
 

@@ -14,7 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class GetJsonFromEndpoint extends AsyncTask<String, Void, JSONArray> {
+public class GetJsonFromEndpoint extends AsyncTask<String, Void, String> {
 
     private String readStream(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -57,20 +57,13 @@ public class GetJsonFromEndpoint extends AsyncTask<String, Void, JSONArray> {
         return result;
     }
 
-    protected JSONArray doInBackground(String... url) {
+    protected String doInBackground(String... url) {
         String example;
         try {
             example = getRequest(url[0]);
         } catch (Exception e) {
             example = "";
         }
-
-        JSONArray jsonArray = null;
-        try {
-            jsonArray = new JSONArray(example);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonArray;
+        return example;
     }
 }
