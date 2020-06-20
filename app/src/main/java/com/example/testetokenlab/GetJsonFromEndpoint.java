@@ -2,6 +2,9 @@ package com.example.testetokenlab;
 
 import android.os.AsyncTask;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,8 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class RetrieveFeedTask extends AsyncTask<String, Void, String>
-{
+public class GetJsonFromEndpoint extends AsyncTask<String, Void, JSONArray> {
 
     private String readStream(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -55,13 +57,20 @@ public class RetrieveFeedTask extends AsyncTask<String, Void, String>
         return result;
     }
 
-    protected String doInBackground(String... url) {
+    protected JSONArray doInBackground(String... url) {
         String example;
         try {
             example = getRequest(url[0]);
         } catch (Exception e) {
             example = "";
         }
-        return example;
+
+        JSONArray jsonArray = null;
+        try {
+            jsonArray = new JSONArray(example);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonArray;
     }
 }
