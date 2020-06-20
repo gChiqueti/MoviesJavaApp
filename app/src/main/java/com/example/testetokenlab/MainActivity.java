@@ -1,5 +1,7 @@
 package com.example.testetokenlab;
 
+import com.example.testetokenlab.RetrieveFeedTask;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -29,69 +31,8 @@ import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
-
-
-    class RetrieveFeedTask extends AsyncTask<String, Void, String>
-    {
-        Exception exception;
-        private String readStream(InputStream in) throws IOException
-        {
-            StringBuilder sb = new StringBuilder();
-            BufferedReader r = new BufferedReader(new InputStreamReader(in),10000);
-            for (String line = r.readLine(); line != null; line =r.readLine()){
-                sb.append(line);
-            }
-            in.close();
-            return sb.toString();
-        }
-
-        public String getRequest(String context)
-        {
-            URL url;
-            String result;
-
-            // Create URL
-            try{
-                url = new URL(context);
-            }catch(MalformedURLException ex){
-                return "";
-            }
-
-            // Opens the connection
-            HttpURLConnection urlConnection;
-            try {
-                urlConnection = (HttpURLConnection) url.openConnection();
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-                return "";
-            }
-
-            try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                result = readStream(in);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "";
-            } finally {
-                urlConnection.disconnect();
-            }
-            return result;
-        }
-
-        protected String doInBackground(String... url)
-        {
-            String example;
-            try {
-                example = getRequest("https://desafio-mobile.nyc3.digitaloceanspaces.com/movies");
-            } catch (Exception e) {
-                this.exception = e;
-                example = "";
-            }
-            return example;
-
-        }
-    }
+    public static final String EXTRA_TEXT = "com.example.testetokenlab.example.EXTRA_TEXT";
+    public static final String ENDPOINT_URL = "https://desafio-mobile.nyc3.digitaloceanspaces.com/movies";
 
     class RetrieveImage extends AsyncTask<String, Void, Bitmap> {
         protected Bitmap doInBackground(String... url) {
@@ -132,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("MyApp","I am here3");
         String result;
         try {
-            result = new RetrieveFeedTask().execute("").get();
+            result = new RetrieveFeedTask().execute(ENDPOINT_URL).get();
             Log.i("OI", result);
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -204,11 +145,19 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 String url = jsonArray.getJSONObject(i).getString("poster_url");
+                String id = jsonArray.getJSONObject(i).getString("id");
                 Log.i("URL", url);
                 Bitmap bitmap = new RetrieveImage().execute(url).get();
                 if (bitmap != null) {
                     ImageView v = new ImageView(this);
                     v.setImageBitmap(bitmap);
+                    v.setClickable(true);
+                    v.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            changeActivity();
+                        }
+                    });
                     ll.addView(v, lp);
                 }
             } catch (Exception e)
@@ -220,8 +169,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    void changeActivity(){
+    void changeActivity()
+    {
         Intent intent = new Intent(this, FilmeDetalhes.class);
+        intent.putExtra(EXTRA_TEXT, ENDPOINT_URL.concat("/238"));
         startActivity(intent);
     };
 }
