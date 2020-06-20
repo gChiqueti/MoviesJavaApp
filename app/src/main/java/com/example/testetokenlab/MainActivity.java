@@ -2,12 +2,14 @@ package com.example.testetokenlab;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -105,16 +107,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    Button botao_principal;
+    ImageView imagem_principal;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button botao_principal;
-        ImageView imagem_principal;
+
 
         botao_principal = (Button) findViewById(R.id.buttonTitulo);
+        botao_principal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeActivity();
+            }
+        });
+
 
         Log.d("MyApp","I am here");
         Log.i("MyApp","I am here2");
@@ -164,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-            botao_principal.setText(title);
+            //botao_principal.setText(title);
 
             Log.i("Title",title);
 
@@ -208,4 +219,9 @@ public class MainActivity extends AppCompatActivity {
         }  // endfor
 
     }
+
+    void changeActivity(){
+        Intent intent = new Intent(this, FilmeDetalhes.class);
+        startActivity(intent);
+    };
 }
