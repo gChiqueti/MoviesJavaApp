@@ -17,14 +17,19 @@ import java.util.concurrent.ExecutionException;
 
 public class FilmeDetalhes extends AppCompatActivity {
 
-    TextView texto;
+    TextView overview;
+    TextView genre;
+    TextView title;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filme_detalhes);
 
-        texto = (TextView) findViewById(R.id.textView3);
+        overview = (TextView) findViewById(R.id.textOverview);
+        title = (TextView) findViewById(R.id.textTitle);
+        genre = (TextView) findViewById(R.id.textGenre);
 
         Intent intent = getIntent();
         String url = intent.getStringExtra(MainActivity.EXTRA_TEXT);
@@ -58,8 +63,15 @@ public class FilmeDetalhes extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        texto.setText(titulo);
+        String strOverview = null;
+        try {
+            strOverview = jsonObject.getString("overview");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+        title.setText(titulo);
+        overview.setText(strOverview);
 
     }
 }

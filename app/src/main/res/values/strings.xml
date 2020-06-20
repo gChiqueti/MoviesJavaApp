@@ -3,4 +3,6 @@
     <string name="botao">botao</string>
     <string name="todo">TODO</string>
     <string name="textview">TextView</string>
+    <string name="titulo">titulo</string>
+    <string name="genero">Genero</string>
 </resources>
