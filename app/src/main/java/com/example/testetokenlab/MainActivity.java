@@ -2,10 +2,15 @@ package com.example.testetokenlab;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,9 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     class RetrieveFeedTask extends AsyncTask<String, Void, String>
     {
-
-        private Exception exception;
-
         private String readStream(InputStream in) throws IOException
         {
             StringBuilder sb = new StringBuilder();
@@ -87,8 +89,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class RetrieveImage extends AsyncTask<String, Void, Bitmap> {
+        protected Bitmap doInBackground(String... url) {
+            Bitmap bitmap = null;
+            try {
+                URL u = new URL(url[0]);
+                InputStream c = (InputStream) u.getContent();
+                bitmap = BitmapFactory.decodeStream(c);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return bitmap;
+        }
+    }
 
-    class Movie()
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button botao_principal;
+        ImageView imagem_principal;
+
         botao_principal = (Button) findViewById(R.id.buttonTitulo);
 
         Log.d("MyApp","I am here");
@@ -116,19 +132,65 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.i("MyApp","I am here4");
 
+        JSONArray jsonArray;
         try {
-            JSONArray jsonArray = new JSONArray(result);
-            String json0 = jsonArray.get(0).toString();
-            Log.i("MyApp",json0);
-            String title = jsonArray.getJSONObject(0).getString("title");
+            jsonArray = new JSONArray(result);
+            String json0 = jsonArray.get(2).toString();
+            Log.i("MyApp23",json0);
+            String title = jsonArray.getJSONObject(2).getString("title");
+
+            // Carrega a imagem no imageView
+            String url = jsonArray.getJSONObject(2).getString("poster_url");
+            Log.i("MyApp24",url);
+
+            ImageView i = (ImageView)findViewById(R.id.image);
+            try {
+                Bitmap bitmap = new RetrieveImage().execute(url).get();
+                if (bitmap != null) {
+                    i.setImageBitmap(bitmap);
+                    Log.i("MyApp", "imagem carregada com sucesso");
+                } else {
+                    Log.i("MyApp", "imagem não foi carregada");
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+                Log.i("MyApp", "Deu erro cabuloso");
+            }
+
+
+
+
+
             botao_principal.setText(title);
+
             Log.i("Title",title);
 
         } catch (JSONException e) {
             Log.i("Erro JSON","Inicio erro json");
             e.printStackTrace();
             Log.i("Erro JSON","Fim erro json");
+            return;
         }
+
+
+        for (int i = 0; i < jsonArray.length(); i++)
+        {
+            try {
+                String title = jsonArray.getJSONObject(i).getString("title");
+                Button myButton = new Button(this);
+                myButton.setText(title);
+
+                LinearLayout ll = (LinearLayout) findViewById(R.id.layout);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                ll.addView(myButton, lp);
+            }catch (JSONException e)
+            {
+
+            }
+
+        }
+
 
 
     }
