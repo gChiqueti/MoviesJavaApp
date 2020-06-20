@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TesteTokenLab</string>
+    <string name="botao">botao</string>
 </resources>
