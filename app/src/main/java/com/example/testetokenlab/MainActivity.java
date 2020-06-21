@@ -16,9 +16,16 @@ import android.widget.LinearLayout;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -26,28 +33,45 @@ public class MainActivity extends AppCompatActivity {
     public static final String ENDPOINT_URL = "https://desafio-mobile.nyc3.digitaloceanspaces.com/movies";
 
 
-    Button botao_principal;
-    ImageView imagem_principal;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        botao_principal = (Button) findViewById(R.id.buttonTitulo);
 
-        String jsonString;
-        try {
-            jsonString = new GetStringFromEndpoint().execute(ENDPOINT_URL).get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            return;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return;
-        }
 
+        OkHttpClient client;
+        client = new OkHttpClient();
+        Request request = new Request.Builder().url(ENDPOINT_URL).build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                Log.i("ERRO:", "Captura de string da URL falhou");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful())
+                {
+                    Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
+                    final String jsonString = response.body().string();
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            retrieveDataFromString(jsonString);
+                        }
+                    });
+
+                }
+            }
+        });
+    }
+
+    void retrieveDataFromString(String jsonString)
+    {
         JSONArray jsonArray = null;
         try {
             jsonArray = new JSONArray(jsonString);
@@ -56,63 +80,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        String json0 = null;
-        try {
-            json0 = jsonArray.get(2).toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        String title = null;
-        try {
-            title = jsonArray.getJSONObject(2).getString("title");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Carrega a imagem no imageView
-        ImageView imageView = (ImageView)findViewById(R.id.image);
-        String url = null;
-        try {
-            url = jsonArray.getJSONObject(2).getString("poster_url");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        try
-        {
-            Bitmap bitmap = new GetBitmapFromURL().execute(url).get();
-            if (bitmap != null)
-            {
-                imageView.setImageBitmap(bitmap);
-                Log.i("MyApp", "imagem carregada com sucesso");
-            } else {
-                Log.i("MyApp", "imagem não foi carregada");
-            }
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-            Log.i("MyApp", "Deu erro cabuloso");
-        }
-
         LinearLayout ll = (LinearLayout) findViewById(R.id.layout);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        for (int i = 0; i < jsonArray.length(); i++)
-        {
+        for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                title = jsonArray.getJSONObject(i).getString("title");
+                String title = jsonArray.getJSONObject(i).getString("title");
                 Button myButton = new Button(this);
                 myButton.setText(title);
                 ll.addView(myButton, lp);
 
-            }catch (JSONException e)
-            {
-
-            }
+            }catch (JSONException e) {}
 
             try {
-                url = jsonArray.getJSONObject(i).getString("poster_url");
+                String url = jsonArray.getJSONObject(i).getString("poster_url");
                 String id = jsonArray.getJSONObject(i).getString("id");
                 Log.i("URL", url);
                 Bitmap bitmap = new GetBitmapFromURL().execute(url).get();
@@ -130,10 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                     ll.addView(v, lp);
                 }
-            } catch (Exception e)
-            {
-
-            }
+            } catch (Exception e) {}
 
         }  // endfor
 

@@ -6,4 +6,5 @@
     <string name="titulo">titulo</string>
     <string name="genero">Genero</string>
     <string name="poster">poster</string>
+    <string name="top_20_most_rated_movies">Top 20 most rated movies</string>
 </resources>

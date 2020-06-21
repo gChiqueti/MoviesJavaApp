@@ -11,7 +11,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class GetStringFromEndpoint extends AsyncTask<String, Void, String> {
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+class GetStringFromEndpoint extends AsyncTask<String, Void, String> {
 
     private String readStream(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();

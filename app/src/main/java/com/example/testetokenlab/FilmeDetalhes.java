@@ -13,7 +13,14 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class FilmeDetalhes extends AppCompatActivity {
 
@@ -38,15 +45,37 @@ public class FilmeDetalhes extends AppCompatActivity {
         Intent intent = getIntent();
         String url = intent.getStringExtra(MainActivity.EXTRA_TEXT);
 
-        // get json array
-        String jsonString;
-        try {
-            jsonString = new GetStringFromEndpoint().execute(url).get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            return;
-        }
+        OkHttpClient client;
+        client = new OkHttpClient();
+        Request request = new Request.Builder().url(url).build();
 
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                Log.i("ERRO:", "Captura de string da URL falhou");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful())
+                {
+                    Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
+                    final String jsonString = response.body().string();
+                    FilmeDetalhes.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            retrieveDataFromString(jsonString);
+                        }
+                    });
+
+                }
+            }
+        });
+    }
+
+    public void retrieveDataFromString(String jsonString)
+    {
         JSONObject jsonObject;
         try {
             jsonObject = new JSONObject(jsonString);
@@ -95,6 +124,5 @@ public class FilmeDetalhes extends AppCompatActivity {
         title.setText(strTitle);
         overview.setText(strOverview);
         tagLine.setText(strTagLine);
-
     }
 }

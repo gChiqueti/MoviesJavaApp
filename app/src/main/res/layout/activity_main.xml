@@ -16,18 +16,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/buttonTitulo"
+            <TextView
+                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/botao" />
-
-            <ImageView
-                android:id="@+id/image"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/todo"
-                app:srcCompat="@android:drawable/btn_dialog" />
+                android:text="@string/top_20_most_rated_movies"
+                android:textAlignment="center"
+                android:textColor="#070707"
+                android:textSize="30sp" />
 
         </LinearLayout>
     </ScrollView>
