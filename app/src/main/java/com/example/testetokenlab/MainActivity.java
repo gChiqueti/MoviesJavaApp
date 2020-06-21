@@ -37,13 +37,14 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_TEXT = "com.example.testetokenlab.example.EXTRA_TEXT";
     public static final String ENDPOINT_URL = "https://desafio-mobile.nyc3.digitaloceanspaces.com/movies";
 
+    private int nbrOfPosters;
+    private int actualPoster;
     int idMainLoadingGif;
     LinearLayout ll;
     LinearLayout.LayoutParams lp;
 
     OkHttpClient client;
-
-
+    LinearLayout[] layouts = new LinearLayout[20];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,41 +101,46 @@ public class MainActivity extends AppCompatActivity {
         //       - Titulo
         //       - Rating
 
+
+        float scale = getResources().getDisplayMetrics().density;
+
+        LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        param.setMargins((int) scale*10, (int)scale*10, (int) scale * 10, (int) scale* 10);
+
+        // LAYOUT HORIZONTAL
         LinearLayout parent = new LinearLayout(this);
         parent.setOrientation(LinearLayout.HORIZONTAL);
-        parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                                             LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        ImageView imgPoster = new ImageView(this);
-        imgPoster.setPadding(10, 5, 10, 5);
-
-        if (poster != null) {
-            imgPoster.setImageBitmap(poster);
-        } else {
-            imgPoster.setImageResource(R.drawable.no_image);
-        }
-        float scale = getResources().getDisplayMetrics().density;
-        imgPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (100*scale), (int) (150*scale)));
-        imgPoster.requestLayout();
-        imgPoster.setClickable(true);
-        imgPoster.setTag(id);
-        imgPoster.setOnClickListener(new View.OnClickListener() {
+        parent.setLayoutParams(param);
+        parent.setPadding(5, 5, 5, 5);
+        parent.setClickable(true);
+        parent.setTag(id);
+        parent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String id = (String) v.getTag();
                 changeActivity(id);
             }
         });
+
+        // IMAGEM
+        ImageView imgPoster = new ImageView(this);
+        imgPoster.setPadding(10, 5, 10, 5);
+        if (poster != null) {
+            imgPoster.setImageBitmap(poster);
+        } else {
+            imgPoster.setImageResource(R.drawable.no_image);
+        }
+        imgPoster.setLayoutParams(new LinearLayout.LayoutParams((int)(100*scale), (int)(150*scale)));
+        imgPoster.requestLayout();
         parent.addView(imgPoster);
 
+        // LAYOUT VERTICAL
         LinearLayout layout2 = new LinearLayout(this);
         layout2.setOrientation(LinearLayout.VERTICAL);
-        layout2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                                              LinearLayout.LayoutParams.WRAP_CONTENT));
+        layout2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         parent.addView(layout2);
 
-//children of layout2 LinearLayout
-
+        // TITULO
         TextView tv1 = new TextView(this);
         tv1.setText(title);
         tv1.setTextSize((int)scale*15);
@@ -142,9 +148,11 @@ public class MainActivity extends AppCompatActivity {
         tv1.setPadding(5, 10, 10, 0);
         layout2.addView(tv1);
 
+        // RATING
         TextView tv2 = new TextView(this);
         tv2.setText(rating);
         tv2.setPadding(5, 5, 10, 0);
+        tv2.setTextSize((int)scale*10);
         layout2.addView(tv2);
 
         return parent;
@@ -153,36 +161,79 @@ public class MainActivity extends AppCompatActivity {
     void retrieveDataFromString(String jsonString)
     {
 
-
-        JSONArray jsonArray = null;
+        JSONArray jsonArray;
         try {
             jsonArray = new JSONArray(jsonString);
         } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
+        this.nbrOfPosters = jsonArray.length();
+        this.actualPoster = 0;
 
+        // funcao chamada em segundo plano
+        updateAllPosters(jsonArray, actualPoster);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-            try {
-                String title = jsonArray.getJSONObject(i).getString("title");
-                String rating = jsonArray.getJSONObject(i).getString("vote_average");
-                String url = jsonArray.getJSONObject(i).getString("poster_url");
-                String id = jsonArray.getJSONObject(i).getString("id");
-                Bitmap bitmap = new GetBitmapFromURL().execute(url).get();
-                LinearLayout l = createNewMovieObject(bitmap, id, title, rating);
-                ll.addView(l, lp);
-            } catch (Exception e) {}
-
-        }
-
+        // REMOVE MAIN LOADING GIF
         View loadingView = this.findViewById(idMainLoadingGif);
         ViewGroup vg = ((ViewGroup) loadingView.getParent());
         vg.removeView(loadingView);
 
     }
 
-    void changeActivity(String id)
+    void updateAllPosters(final JSONArray jsonArray, final int posterNbr)
     {
+        if (posterNbr >= nbrOfPosters) {
+            return;
+        }
+
+        try {
+            final String title = jsonArray.getJSONObject(posterNbr).getString("title");
+            final String rating = jsonArray.getJSONObject(posterNbr).getString("vote_average");
+            final String id = jsonArray.getJSONObject(posterNbr).getString("id");
+            final String posterUrl = jsonArray.getJSONObject(posterNbr).getString("poster_url");
+
+            Request request = new Request.Builder().url(posterUrl).build();
+            client.newCall(request).enqueue(new Callback()
+            {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                    Log.i("ERRO:", "Captura de string da URL falhou");
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    final Bitmap bmp;
+                    if (response.isSuccessful()) {
+                        Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
+                        InputStream is = response.body().byteStream();
+                        bmp = BitmapFactory.decodeStream(is);
+                    } else {
+                        bmp = null;
+                    }
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            LinearLayout l = createNewMovieObject(bmp, id, title, rating);
+                            ll.addView(l, lp);
+                            updateAllPosters(jsonArray, posterNbr + 1);
+                        }
+                    });
+
+
+                }
+            });
+
+
+            //LinearLayout l = createNewMovieObject(null, id, title, rating);
+            //ll.addView(l, lp);
+        } catch (Exception e) {
+            return;
+        }
+
+    }
+    void changeActivity(String id) {
         Intent intent = new Intent(this, FilmeDetalhes.class);
         intent.putExtra(EXTRA_TEXT, ENDPOINT_URL.concat("/" + id));
         startActivity(intent);
