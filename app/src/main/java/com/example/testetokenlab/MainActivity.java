@@ -25,19 +25,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_TEXT = "com.example.testetokenlab.example.EXTRA_TEXT";
     public static final String ENDPOINT_URL = "https://desafio-mobile.nyc3.digitaloceanspaces.com/movies";
 
-    class RetrieveImage extends AsyncTask<String, Void, Bitmap> {
-        protected Bitmap doInBackground(String... url) {
-            Bitmap bitmap = null;
-            try {
-                URL u = new URL(url[0]);
-                InputStream c = (InputStream) u.getContent();
-                bitmap = BitmapFactory.decodeStream(c);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return bitmap;
-        }
-    }
 
     Button botao_principal;
     ImageView imagem_principal;
@@ -52,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         String jsonString;
         try {
-            jsonString = new GetJsonFromEndpoint().execute(ENDPOINT_URL).get();
+            jsonString = new GetStringFromEndpoint().execute(ENDPOINT_URL).get();
         } catch (ExecutionException e) {
             e.printStackTrace();
             return;
@@ -94,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
         try
         {
-            Bitmap bitmap = new RetrieveImage().execute(url).get();
+            Bitmap bitmap = new GetBitmapFromURL().execute(url).get();
             if (bitmap != null)
             {
                 imageView.setImageBitmap(bitmap);
@@ -128,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 url = jsonArray.getJSONObject(i).getString("poster_url");
                 String id = jsonArray.getJSONObject(i).getString("id");
                 Log.i("URL", url);
-                Bitmap bitmap = new RetrieveImage().execute(url).get();
+                Bitmap bitmap = new GetBitmapFromURL().execute(url).get();
                 if (bitmap != null) {
                     ImageView v = new ImageView(this);
                     v.setImageBitmap(bitmap);
