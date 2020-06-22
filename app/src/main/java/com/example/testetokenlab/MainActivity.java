@@ -39,39 +39,51 @@ public class MainActivity extends AppCompatActivity {
 
     private int nbrOfPosters;
     private int actualPoster;
-    int idMainLoadingGif;
     LinearLayout ll;
     LinearLayout.LayoutParams lp;
 
     OkHttpClient client;
-    LinearLayout[] layouts = new LinearLayout[20];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
+        client = new OkHttpClient();
         ll = (LinearLayout) findViewById(R.id.layout);
         lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        GifImageView imgMainLoadingGif;
+
+        retriveStringFromURL();
+    }
+
+    void retriveStringFromURL()
+    {
+        // START GIF
+        final GifImageView imgMainLoadingGif;
         imgMainLoadingGif = new GifImageView(this);
         imgMainLoadingGif.setImageResource(R.drawable.loading);
-        idMainLoadingGif = View.generateViewId();
-        imgMainLoadingGif.setId(idMainLoadingGif);
         ll.addView(imgMainLoadingGif, lp);
 
-        client = new OkHttpClient();
         Request request = new Request.Builder().url(ENDPOINT_URL).build();
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 Log.i("ERRO:", "Captura de string da URL falhou");
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ViewGroup vg = ((ViewGroup) imgMainLoadingGif.getParent());
+                        vg.removeView(imgMainLoadingGif);
+                        TextView txt = new TextView(MainActivity.this);
+                        txt.setText("Unable to connect to server. Please verify your internet connection and try again");
+                        ll.addView(txt, lp);
+                    }
+                });
+
             }
 
             @Override
@@ -83,7 +95,10 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            ViewGroup vg = ((ViewGroup) imgMainLoadingGif.getParent());
+                            vg.removeView(imgMainLoadingGif);
                             retrieveDataFromString(jsonString);
+
                         }
                     });
 
@@ -100,8 +115,6 @@ public class MainActivity extends AppCompatActivity {
         //    - Vertical layout
         //       - Titulo
         //       - Rating
-
-
         float scale = getResources().getDisplayMetrics().density;
 
         LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -173,12 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
         // funcao chamada em segundo plano
         updateAllPosters(jsonArray, actualPoster);
-
-        // REMOVE MAIN LOADING GIF
-        View loadingView = this.findViewById(idMainLoadingGif);
-        ViewGroup vg = ((ViewGroup) loadingView.getParent());
-        vg.removeView(loadingView);
-
     }
 
     void updateAllPosters(final JSONArray jsonArray, final int posterNbr)
