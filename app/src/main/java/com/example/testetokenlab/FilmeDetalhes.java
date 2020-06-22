@@ -3,6 +3,7 @@ package com.example.testetokenlab;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -50,11 +53,15 @@ public class FilmeDetalhes extends AppCompatActivity {
         backdrop = (ImageView) findViewById(R.id.imgBackdrop);
         producedBy = (TextView) findViewById(R.id.textProductedBy);
 
-        // GET STRING ID AND POSTER BITMAP FROM THE INTENT
+        // GET STRING ID, CREATES COMPLETE URL WITH IT AND GET IMAGE FROM INTENT
         Intent intent = getIntent();
-        String url = intent.getStringExtra(MainActivity.EXTRA_TEXT);
-        byte[] byteArray = getIntent().getByteArrayExtra(MainActivity.EXTRA_BMP);
-        Bitmap imgPoster = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        final String id = intent.getStringExtra(MainActivity.EXTRA_ID);
+        final String url = MainActivity.ENDPOINT_URL.concat("/" + id);
+        final byte[] byteArray = getIntent().getByteArrayExtra(MainActivity.EXTRA_BMP);
+        final Bitmap imgPoster = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+
+        // PREPARE STRING NAME FOR SAVE CONTENT USING SHARED PREFERENCES
+        final String JSON_STRING_WITH_ID = MainActivity.JSON_STRING.concat("_" + id);
 
         // INSERT POSTER IMAGE INTO THE IMAGEVIEW
         if (imgPoster != null){
@@ -67,7 +74,12 @@ public class FilmeDetalhes extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                Log.i("ERRO:", "Captura de string da URL falhou");
+
+                SharedPreferences sP = getSharedPreferences(MainActivity.SHARED_PREFS, MODE_PRIVATE);
+                String jsonString = sP.getString(JSON_STRING_WITH_ID, "");
+                if (jsonString != ""){
+                    retrieveDataFromString(jsonString);
+                }
             }
 
             @Override
@@ -76,6 +88,13 @@ public class FilmeDetalhes extends AppCompatActivity {
                 {
                     Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
                     final String jsonString = response.body().string();
+
+                    // SAVE JSON STRING FOR OFFLINE USE
+                    SharedPreferences sP = getSharedPreferences(MainActivity.SHARED_PREFS, MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sP.edit();
+                    editor.putString(JSON_STRING_WITH_ID, jsonString);
+                    editor.apply();
+
                     FilmeDetalhes.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

@@ -43,7 +43,7 @@ import pl.droidsonroids.gif.GifImageView;
 
 
 public class MainActivity extends AppCompatActivity {
-    public static final String EXTRA_TEXT = "com.example.testetokenlab.example.EXTRA_TEXT";
+    public static final String EXTRA_ID = "com.example.testetokenlab.example.EXTRA_ID";
     public static final String EXTRA_BMP = "com.example.testetokenlab.example.EXTRA_BMP";
     public static final String ENDPOINT_URL = "https://desafio-mobile.nyc3.digitaloceanspaces.com/movies";
 
@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                Log.i("ERROOOOO:", "Captura de string da URL falhou");
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -97,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
                             txt.setText("Unable to connect to server. Please verify your internet connection and try again");
                             ll.addView(txt, lp);
                         } else {
+                            TextView txt = new TextView(MainActivity.this);
+                            txt.setText("Unable to connect to server. Using last saved resources");
+                            ll.addView(txt, lp);
                             retrieveDataFromString(jsonString);
                         }
                     }
@@ -251,7 +253,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, FilmeDetalhes.class);
 
         // INSERT STRING ID INTO INTENT
-        intent.putExtra(EXTRA_TEXT, ENDPOINT_URL.concat("/" + id));
+        intent.putExtra(EXTRA_ID, id);
+
 
         // COMPRESS BITMAP INTO BYTE ARRAY BEFORE INSERTING INTO INTENT
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
