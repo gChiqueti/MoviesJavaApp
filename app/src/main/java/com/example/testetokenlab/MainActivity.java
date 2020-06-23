@@ -5,17 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.LinkAddress;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,11 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -110,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful())
                 {
-                    Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
                     final String jsonString = response.body().string();
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
@@ -182,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
         imgPoster.requestLayout();
         parent.addView(imgPoster);
 
-
         // LAYOUT VERTICAL
         LinearLayout layout2 = new LinearLayout(this);
         layout2.setOrientation(LinearLayout.VERTICAL);
@@ -219,12 +207,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // funcao chamada em segundo plano
-        updateAllPosters(jsonArray);
-    }
-
-    void updateAllPosters(final JSONArray jsonArray)
-    {
         for (int i = 0; i < jsonArray.length(); i++)
         {
             try {
