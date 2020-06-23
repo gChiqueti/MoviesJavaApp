@@ -11,6 +11,8 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,11 +76,19 @@ public class FilmeDetalhes extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-
+                Log.i("ERRO","FALHA AO EXECUTAR NOVO REQUEST");
                 SharedPreferences sP = getSharedPreferences(MainActivity.SHARED_PREFS, MODE_PRIVATE);
-                String jsonString = sP.getString(JSON_STRING_WITH_ID, "");
+                final String jsonString = sP.getString(JSON_STRING_WITH_ID, "");
                 if (jsonString != ""){
-                    retrieveDataFromString(jsonString);
+                    FilmeDetalhes.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            retrieveDataFromString(jsonString);
+                        }
+                    });
+
+                } else {
+                    title.setText("Could not retrieve information from the server. Please check your internet connection and try again");
                 }
             }
 
@@ -86,7 +96,6 @@ public class FilmeDetalhes extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful())
                 {
-                    Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
                     final String jsonString = response.body().string();
 
                     // SAVE JSON STRING FOR OFFLINE USE
@@ -131,32 +140,11 @@ public class FilmeDetalhes extends AppCompatActivity {
         String urlBackdrop = null;
         try {
             urlBackdrop = jsonObject.getString("backdrop_url");
-            Request request = new Request.Builder().url(urlBackdrop).build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                    Log.i("ERRO:", "Captura de string da URL falhou");
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    final Bitmap bmp;
-                    if (response.isSuccessful()) {
-                        Log.i("SUCESSO:", "Captura de string da URL foi bem sucedida");
-                        InputStream is = response.body().byteStream();
-                        bmp = BitmapFactory.decodeStream(is);
-                    } else {
-                        bmp = null;
-                    }
-                    FilmeDetalhes.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            backdrop.setImageBitmap(bmp);
-                        }
-                    });
-                }
-            });
+            Glide.with(this)
+                    .load(urlBackdrop)
+                    .placeholder(R.drawable.loading)
+                    .error(R.drawable.no_image)
+                    .into(backdrop);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -178,13 +166,13 @@ public class FilmeDetalhes extends AppCompatActivity {
         }
 
         // GET LIST OF PRODUCTION COMPANIES
-        JSONArray strProductedBy = null;
+        JSONArray sirProducedBy = null;
         String producers = "";
         try {
-            strProductedBy = jsonObject.getJSONArray("production_companies");
-            for (int i = 0; i < strProductedBy.length(); i++)
+            sirProducedBy = jsonObject.getJSONArray("production_companies");
+            for (int i = 0; i < sirProducedBy.length(); i++)
             {
-                String companyName = strProductedBy.getJSONObject(i).getString("name");
+                String companyName = sirProducedBy.getJSONObject(i).getString("name");
                 producers = producers.concat(companyName + ", ");
             }
         } catch (JSONException e) {

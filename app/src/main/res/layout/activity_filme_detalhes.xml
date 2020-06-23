@@ -45,7 +45,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:text="@string/titulo"
+                        android:text="@string/loading_content"
                         android:textColor="#0B0A0A"
                         android:textSize="24sp" />
 
@@ -55,7 +55,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:text="Slogan"
                         android:textSize="18sp" />
 
                     <TextView
@@ -64,8 +63,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:text="@string/genero" />
+                        android:layout_marginEnd="16dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -78,23 +76,23 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
-                android:text="Overview"
                 android:textAllCaps="false"
                 android:textColor="#070707"
                 android:textSize="18sp" />
-
-            <ImageView
-                android:id="@+id/imgBackdrop"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:srcCompat="@android:drawable/btn_dialog" />
 
             <TextView
                 android:id="@+id/textProductedBy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:text="TextView" />
+                android:layout_marginStart="16dp" />
+
+            <ImageView
+                android:id="@+id/imgBackdrop"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/backdrop" />
+
         </LinearLayout>
     </ScrollView>
 

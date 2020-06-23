@@ -8,4 +8,6 @@
     <string name="poster">poster</string>
     <string name="top_20_most_rated_movies">Top 20 most rated movies</string>
     <string name="loading_image">Loading image</string>
+    <string name="loading_content">loading content ...</string>
+    <string name="backdrop">BACKDROP</string>
 </resources>
