@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 final String posterUrl = jsonArray.getJSONObject(i).getString("poster_url");
 
                 // CREATE A BASIC VIEW LAYOUT WITH THE TEXTS AND A NULL BITMAP
-                ImageView poster = createNewMovieObject(null, id, title, rating);
+                ImageView poster = createNewMovieObject(i+1,null, id, title, rating);
 
                 // TRY TO RETRIEVE BITMAP FROM THE URL AND INSERT IT INTO THE LAYOUT. IF FAILS,
                 // IT INSERTS A DEFAULT IMAGE
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
     //     - Vertical layout
     //        - Titulo
     //        - Rating
-    ImageView createNewMovieObject(Bitmap poster, String id, String title, String rating)
+    ImageView createNewMovieObject(int position, Bitmap poster, String id, String title, String rating)
     {
         float scale = getResources().getDisplayMetrics().density;
 
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
 
         // TITULO
         TextView tv1 = new TextView(this);
-        tv1.setText(title);
+        tv1.setText(position + ": " + title);
         tv1.setTextSize((int)scale*13);
         tv1.setTextColor(Color.parseColor("#000000"));
         tv1.setPadding(5, 10, 10, 0);
